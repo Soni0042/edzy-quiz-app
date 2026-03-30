@@ -17,6 +17,7 @@ interface QuizQuestionProps {
   subject: string;
   onSelectOption: (optionId: string) => void;
   onNext: () => void;
+  onSubmit: () => void; // ✅ NEW
 }
 
 const OPTION_LABELS = ["A", "B", "C", "D"];
@@ -32,15 +33,14 @@ export default function QuizQuestion({
   subject,
   onSelectOption,
   onNext,
+  onSubmit,
 }: QuizQuestionProps) {
   const nextBtnRef = useRef<HTMLButtonElement>(null);
 
-  // ✅ Safe options handling (NO CRASH)
   const options = Array.isArray(question?.options) ? question.options : [];
 
-  // Auto-focus Next button
   useEffect(() => {
-    if (answerState === "correct" && nextBtnRef.current) {
+    if (answerState !== "unanswered" && nextBtnRef.current) {
       setTimeout(() => nextBtnRef.current?.focus(), 300);
     }
   }, [answerState]);
@@ -49,12 +49,14 @@ export default function QuizQuestion({
     const isSelected = selectedOptionId === optionId;
     const isCorrect = optionId === question?.correctOptionId;
 
+    // Before submit
     if (answerState === "unanswered") {
       return isSelected
         ? "bg-brand-600/20 border-brand-500 text-white ring-1 ring-brand-400/50"
         : "bg-surface-2 border-surface-4 text-slate-300 hover:bg-surface-3 hover:border-slate-500 hover:text-white";
     }
 
+    // After submit (correct)
     if (answerState === "correct") {
       if (isCorrect) {
         return "bg-emerald-500/20 border-emerald-500 text-emerald-200";
@@ -62,17 +64,22 @@ export default function QuizQuestion({
       return "bg-surface-2 border-surface-4/50 text-slate-500 opacity-50";
     }
 
+    // After submit (incorrect)
     if (answerState === "incorrect") {
       if (isSelected) {
         return "bg-red-500/20 border-red-500 text-red-300";
       }
-      return "bg-surface-2 border-surface-4 text-slate-300 hover:bg-surface-3 hover:border-slate-500 hover:text-white";
+      if (isCorrect) {
+        return "bg-emerald-500/20 border-emerald-500 text-emerald-200";
+      }
+      return "bg-surface-2 border-surface-4 text-slate-300 opacity-50";
     }
 
     return "";
   };
 
-  const isLocked = answerState === "correct";
+  // Lock options after submit
+  const isLocked = answerState !== "unanswered";
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -95,39 +102,46 @@ export default function QuizQuestion({
 
       {/* Question */}
       <div className="bg-surface-1 border rounded-xl p-5 mb-5">
-        <p className="text-white">{question?.questionText || "Loading..."}</p>
+        <p className="text-white">
+          {question?.questionText || "Loading..."}
+        </p>
       </div>
 
-      {/* ✅ OPTIONS SAFE RENDER */}
+      {/* Options */}
       <div className="space-y-3 mb-6">
         {options.length > 0 ? (
-          options.map((option, idx) => {
-            const isSelected = selectedOptionId === option.optionId;
-            const isCorrect = option.optionId === question?.correctOptionId;
-
-            return (
-              <button
-                key={option.optionId}
-                onClick={() =>
-                  !isLocked && onSelectOption(option.optionId)
-                }
-                disabled={isLocked}
-                className={cn(
-                  "w-full p-4 rounded-lg border text-left",
-                  getOptionStyle(option.optionId)
-                )}
-              >
-                <span className="mr-2 font-bold">
-                  {OPTION_LABELS[idx]}
-                </span>
-                {option.optionText || "Option"}
-              </button>
-            );
-          })
+          options.map((option, idx) => (
+            <button
+              key={option.optionId}
+              onClick={() =>
+                !isLocked && onSelectOption(option.optionId)
+              }
+              disabled={isLocked}
+              className={cn(
+                "w-full p-4 rounded-lg border text-left",
+                getOptionStyle(option.optionId)
+              )}
+            >
+              <span className="mr-2 font-bold">
+                {OPTION_LABELS[idx]}
+              </span>
+              {option.optionText || "Option"}
+            </button>
+          ))
         ) : (
           <p className="text-slate-400">Loading options...</p>
         )}
       </div>
+
+      {/* Submit Button */}
+      {answerState === "unanswered" && selectedOptionId && (
+        <button
+          onClick={onSubmit}
+          className="w-full py-3 bg-green-600 text-white rounded-lg mb-3"
+        >
+          Submit Answer
+        </button>
+      )}
 
       {/* Feedback */}
       {answerState !== "unanswered" && (
@@ -144,8 +158,8 @@ export default function QuizQuestion({
         </p>
       )}
 
-      {/* Next Button */}
-      {answerState === "correct" && (
+      {/* Next Button (FIXED) */}
+      {answerState !== "unanswered" && (
         <button
           ref={nextBtnRef}
           onClick={onNext}

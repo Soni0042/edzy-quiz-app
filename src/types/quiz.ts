@@ -6,10 +6,13 @@ export interface QuizOption {
 }
 
 export interface QuizQuestion {
-  questionId: string;
+  id: string; // ✅ FIXED (was questionId)
+
   questionText: string;
   options: QuizOption[];
   correctOptionId: string;
+
+  solution?: string; // optional (future use)
 }
 
 export interface QuizApiResponse {
@@ -40,7 +43,7 @@ export interface QuizConfig {
 }
 
 export interface QuizAttemptRecord {
-  questionId: string;
+  questionId: string; // keep this same
   incorrectAttempts: number;
   timeElapsed: number;
 }
