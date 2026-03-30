@@ -26,6 +26,7 @@ function ScoreRing({ score, total }: { score: number; total: number }) {
       : percentage >= 50
       ? "#f59e0b"
       : "#ef4444";
+
   const glowColor =
     percentage >= 80
       ? "rgba(16,185,129,0.4)"
@@ -34,22 +35,17 @@ function ScoreRing({ score, total }: { score: number; total: number }) {
       : "rgba(239,68,68,0.4)";
 
   const label =
-    percentage >= 80 ? "Excellent!" : percentage >= 50 ? "Good Job!" : "Keep Practicing!";
+    percentage >= 80
+      ? "Excellent!"
+      : percentage >= 50
+      ? "Good Job!"
+      : "Keep Practicing!";
 
   return (
     <div className="flex flex-col items-center">
       <div className="relative w-36 h-36">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-          {/* Background track */}
-          <circle
-            cx="60"
-            cy="60"
-            r={radius}
-            fill="none"
-            stroke="#1e2536"
-            strokeWidth="10"
-          />
-          {/* Progress arc */}
+          <circle cx="60" cy="60" r={radius} fill="none" stroke="#1e2536" strokeWidth="10" />
           <circle
             cx="60"
             cy="60"
@@ -67,13 +63,12 @@ function ScoreRing({ score, total }: { score: number; total: number }) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span
-            className="font-display font-bold text-2xl"
-            style={{ color }}
-          >
+          <span className="font-display font-bold text-2xl" style={{ color }}>
             {score}/{total}
           </span>
-          <span className="font-mono text-xs text-slate-400">{percentage}%</span>
+          <span className="font-mono text-xs text-slate-400">
+            {percentage}%
+          </span>
         </div>
       </div>
       <p className="font-display font-semibold text-base mt-2" style={{ color }}>
@@ -115,145 +110,63 @@ export default function QuizSummary({
       </div>
 
       {/* Score Ring */}
-      <div className="flex justify-center mb-8 animate-pop-in" style={{ animationDelay: "200ms" }}>
+      <div className="flex justify-center mb-8">
         <ScoreRing score={score} total={totalQuestions} />
       </div>
 
-      {/* Stats Row */}
+      {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        {[
-          {
-            label: "Score",
-            value: `${score}/${totalQuestions}`,
-            sub: `${percentage}%`,
-            color: "text-brand-400",
-            bg: "bg-brand-500/10 border-brand-500/20",
-          },
-          {
-            label: "Wrong Attempts",
-            value: totalIncorrectAttempts,
-            sub: totalIncorrectAttempts === 0 ? "Perfect!" : "total",
-            color: totalIncorrectAttempts === 0 ? "text-emerald-400" : "text-red-400",
-            bg:
-              totalIncorrectAttempts === 0
-                ? "bg-emerald-500/10 border-emerald-500/20"
-                : "bg-red-500/10 border-red-500/20",
-          },
-          {
-            label: "Avg. Time",
-            value: `${avgTime}s`,
-            sub: "per question",
-            color: "text-amber-400",
-            bg: "bg-amber-500/10 border-amber-500/20",
-          },
-        ].map((stat, i) => (
-          <div
-            key={stat.label}
-            className={cn(
-              "rounded-xl border p-4 text-center animate-count-up",
-              stat.bg
-            )}
-            style={{ animationDelay: `${300 + i * 80}ms` }}
-          >
-            <p className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-1">
-              {stat.label}
-            </p>
-            <p className={cn("font-display font-bold text-xl", stat.color)}>
-              {stat.value}
-            </p>
-            <p className="text-xs text-slate-500 font-body">{stat.sub}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Per-question breakdown */}
-      <div
-        className="bg-surface-1 border border-surface-4 rounded-2xl p-4 mb-6 animate-slide-up"
-        style={{ animationDelay: "500ms" }}
-      >
-        <h3 className="text-xs font-mono font-semibold text-slate-400 uppercase tracking-widest mb-3">
-          Question Breakdown
-        </h3>
-        <div className="space-y-2 max-h-60 overflow-y-auto pr-1 scrollbar-thin">
-          {questions.map((q, idx) => {
-            const record = attemptRecords[idx];
-            const incorrect = record?.incorrectAttempts ?? 0;
-            const time = record?.timeElapsed ?? 0;
-            return (
-              <div
-                key={q.questionId}
-                className="flex items-center gap-3 p-2.5 rounded-lg bg-surface-2/50"
-              >
-                <div
-                  className={cn(
-                    "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0",
-                    incorrect === 0 ? "bg-emerald-500/20" : "bg-red-500/20"
-                  )}
-                >
-                  {incorrect === 0 ? (
-                    <svg
-                      className="w-3 h-3 text-emerald-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  ) : (
-                    <span className="text-red-400 font-mono text-xs font-bold">{incorrect}</span>
-                  )}
-                </div>
-                <p className="flex-1 text-xs font-body text-slate-400 truncate">
-                  {q.questionText}
-                </p>
-                <span className="text-xs font-mono text-slate-600 flex-shrink-0">
-                  {time}s
-                </span>
-              </div>
-            );
-          })}
+        <div className="text-center">
+          <p className="text-xs text-slate-500">Score</p>
+          <p className="text-lg text-brand-400">{score}/{totalQuestions}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-xs text-slate-500">Wrong</p>
+          <p className="text-lg text-red-400">{totalIncorrectAttempts}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-xs text-slate-500">Avg Time</p>
+          <p className="text-lg text-amber-400">{avgTime}s</p>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3 animate-slide-up" style={{ animationDelay: "600ms" }}>
-        <button
-          onClick={onReattempt}
-          className="flex-1 py-3.5 rounded-xl border border-brand-500/40 bg-brand-600/10 text-brand-300 font-display font-bold text-sm tracking-wide hover:bg-brand-600/20 hover:border-brand-500/60 transition-all duration-200 flex items-center justify-center gap-2"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
+      {/* Breakdown */}
+      <div className="space-y-2 mb-6">
+        {questions.map((q, idx) => {
+          const record = attemptRecords[idx];
+          const incorrect = record?.incorrectAttempts ?? 0;
+          const time = record?.timeElapsed ?? 0;
+
+          return (
+            <div
+              key={q.id} // ✅ FIXED HERE
+              className="flex items-center gap-3 p-2 rounded bg-surface-2/50"
+            >
+              <div
+                className={cn(
+                  "w-6 h-6 rounded-full flex items-center justify-center",
+                  incorrect === 0 ? "bg-green-500/20" : "bg-red-500/20"
+                )}
+              >
+                {incorrect === 0 ? "✓" : incorrect}
+              </div>
+
+              <p className="flex-1 text-sm text-slate-400 truncate">
+                {q.questionText}
+              </p>
+
+              <span className="text-xs text-slate-500">{time}s</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-3">
+        <button onClick={onReattempt} className="flex-1 py-3 bg-gray-700 rounded">
           Reattempt
         </button>
-        <button
-          onClick={onNewQuiz}
-          className="flex-1 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-display font-bold text-sm tracking-wide transition-all duration-200 hover:shadow-lg hover:shadow-brand-500/25 flex items-center justify-center gap-2"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
+        <button onClick={onNewQuiz} className="flex-1 py-3 bg-blue-600 rounded">
           New Quiz
         </button>
       </div>
